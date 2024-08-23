@@ -1,0 +1,238 @@
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #F7F3FA;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.chat-container {
+    display: flex;
+    height: 700px;
+    width: 1000px;
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+.sidebar {
+    width: 80px;
+    background-color: #F7F3FA;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    transition: width 0.3s;
+    position: relative;
+    z-index: 1;
+}
+
+.sidebar.expanded {
+    width: 200px;
+}
+
+.sidebar-button {
+    display: none;
+}
+
+.sidebar.expanded .sidebar-button {
+    display: block;
+    background-color: #FFE5EB;
+    border: none;
+    border-radius: 20px;
+    width: 100%;
+    height: 50px;
+    font-size: 24px;
+    color: #9f606c;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-button:hover {
+    transform: rotate(90deg);
+}
+
+.new-chat-button {
+    display: none;
+}
+
+.sidebar.expanded .new-chat-button {
+    display: block;
+    background-color: #7D6F9B;
+    color: white;
+    border-radius: 20px;
+    width: 100%;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    text-align: left;
+    padding-left: 15px;
+}
+
+.menu-item-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, width 0.3s;
+    position: relative;
+    overflow: hidden;
+    padding: 10px 15px;
+    width: 100%;
+    color: #7D6F9B;
+    background-color: #EAE4EF;
+}
+
+.menu-item.active {
+    background-color: #7D6F9B;
+    color: white;
+}
+
+.menu-item span {
+    margin-left: 15px;
+    font-size: 14px;
+    display: none;
+}
+
+.sidebar.expanded .menu-item span {
+    display: inline;
+}
+
+.chat-section {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    border-radius: 0 20px 20px 0;
+    overflow: hidden;
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #F7F3FA;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+.profile-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #4a4a4a;
+}
+
+.settings-icon {
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.message.left {
+    justify-content: flex-start;
+}
+
+.message.right {
+    justify-content: flex-end;
+}
+
+.profile-image {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.message-content {
+    background-color: #EAE4EF;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    color: #333;
+    max-width: 60%;
+}
+
+.message.right .message-content {
+    background-color: #7D6F9B;
+    color: white;
+}
+
+.chat-input {
+    padding: 15px;
+    border-top: 1px solid #e6e6e6;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #F7F3FA;
+}
+
+.chat-input input {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    background-color: #fff;
+    outline: none;
+}
+
+.send-button {
+    background: #7D6F9B;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+}
+
+.send-button:hover {
+    background: #5e4c77;
+}
+
+.toggle-menu {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background-color: #7D6F9B;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.toggle-menu:hover {
+    background-color: #5e4c77;
+}
