@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import TopBar from './topbar';
 import Sidebar from './Sidebar';
@@ -17,27 +17,47 @@ function Chats() {
   const [inputText, setInputText] = useState('');
   const [messages, setMessages] = useState([]);
 
+  // Ref to scroll to the bottom of the chat
+  const chatMessagesEndRef = useRef(null);
+
+  // Function to scroll to bottom
+  const scrollToBottom = () => {
+    chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   useEffect(() => {
-    // Fetch existing chat messages when component mounts
-    fetch(backendUrl + `/chat/${user.id}/${Id}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`, // Add the JWT token in the Authorization header
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(response => response.json())
-      .then(data => {
+    const fetchChatMessages = async () => {
+      try {
+        const response = await fetch(`${backendUrl}/chat/${user.id}/${Id}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`, // Add the JWT token in the Authorization header
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch chat messages');
+        }
+
+        const data = await response.json();
         const chatMessages = data.messages || [];
+
         setMessages(chatMessages.map(msg => ({
           message: msg.content,
           isSender: msg.sender === user.id,
         })));
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error fetching chat data:', error);
-      });
-  }, [user.id, Id]);
+      }
+    };
+
+    fetchChatMessages();
+  }, [user.id, Id]); // Dependencies for the useEffect hook
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]); // Scroll to bottom when messages change
 
   const handleSendMessage = () => {
     if (inputText.trim() === '') return;
@@ -47,7 +67,7 @@ function Chats() {
       sender: user.id,
     };
 
-    fetch(backendUrl + `/message/${user.id}/${Id}/add`, {
+    fetch(`${backendUrl}/message/${user.id}/${Id}/add`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -55,11 +75,13 @@ function Chats() {
       },
       body: JSON.stringify(message),
     })
-      .then(response => {
-        if (response.ok) {
+      .then(response => response.json())
+      .then(data => {
+        if (data) {
           setMessages(prevMessages => [
             ...prevMessages,
-            { message: inputText, isSender: true }, // Add message to UI
+            { message: inputText, isSender: true }, // Add sent message to UI
+            { message: data.content, isSender: false } // Simulate system response
           ]);
           setInputText(''); // Clear input field after sending
         } else {
@@ -87,6 +109,8 @@ function Chats() {
           {messages.map((msg, index) => (
             <ChatBubble key={index} message={msg.message} isSender={msg.isSender} />
           ))}
+          {/* This div is for scrolling to the bottom */}
+          <div ref={chatMessagesEndRef} />
         </div>
         <div style={styles.chatInput}>
           <input

@@ -20,23 +20,48 @@ public class MessageController {
 
     @Autowired
     private UserRepo userRepo;
-
     @PostMapping("/{userId}/{chatId}/add")
-    public void addMessage(@PathVariable String userId, @PathVariable String chatId, @RequestBody Message message) {
+    public ResponseEntity<Message> addMessage(@PathVariable String userId, @PathVariable String chatId, @RequestBody Message message) {
         Optional<User> optionalUser = userRepo.findById(userId);
+
         if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            user.getChats().stream()
-                    .filter(chat -> chat.getId().equals(chatId))
-                    .findFirst()
-                    .ifPresent(chat -> {
-                        message.setId(UUID.randomUUID().toString()); // Set unique ID for the chat
-                        message.setTimestamp(LocalDateTime.now());
-                        chat.getMessages().add(message);
-                        userRepo.save(user);
-                    });
+            if (message.getSender().equals(userId)) {
+                User user = optionalUser.get();
+                Optional<Chat> optionalChat = user.getChats().stream()
+                        .filter(chat -> chat.getId().equals(chatId))
+                        .findFirst();
+
+                if (optionalChat.isPresent()) {
+                    Chat chat = optionalChat.get();
+
+                    // Set message details
+                    message.setId(UUID.randomUUID().toString()); // Set unique ID for the message
+                    message.setTimestamp(LocalDateTime.now());
+                    chat.getMessages().add(message);
+
+                    // Add a system response message
+                    Message response = new Message();
+                    response.setId(UUID.randomUUID().toString()); // Set unique ID for the response
+                    response.setTimestamp(LocalDateTime.now());
+                    response.setSender("Sys");
+                    response.setContent("hh jawab");
+                    chat.getMessages().add(response);
+
+                    userRepo.save(user); // Save the updated user with the new messages
+
+                    // Return the original message as the response
+                    return ResponseEntity.ok(response);
+                } else {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Chat not found
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Message sender mismatch
+            }
         }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // User not found
     }
+
 
     @GetMapping("/{userId}/{chatId}/{messageId}")
     public Optional<Message> getMessage(@PathVariable String userId, @PathVariable String chatId, @PathVariable String messageId) {
