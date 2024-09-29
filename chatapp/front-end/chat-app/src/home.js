@@ -5,13 +5,14 @@ import ChatBubble from './ChatBubble';
 import Chat from './chat';
 
 function Home() {
+  
   return (
     <div style={styles.chatContainer}>
       <Sidebar />
       <div style={styles.chatSection}>
         <TopBar />
         <div style={styles.chatMessages}>
-          <Chat userId="66c7d9015922b44ca923fb66"  chatId="6b9023f7-7813-4659-9914-cf94ccb0afd7" />
+          <Chat userId=""  chatId="" />
                 </div>
         <div style={styles.chatInput}>
           <input type="text" placeholder="Type your message here..." style={styles.input} />

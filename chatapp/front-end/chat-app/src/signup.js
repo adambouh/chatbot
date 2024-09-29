@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // Import Link for navigation
-import backendUrl from './url';
-import checkSession from './session';
+import React, { useState } from 'react';
+import backendUrl from './url'; // Ensure this contains your backend base URL
 
-function Login() {
+function Signup() {
   const [formData, setFormData] = useState({
     username: '',
-    password: ''
+    password: '',
   });
-
   const [error, setError] = useState(null);
 
   const handleInputChange = (event) => {
@@ -23,54 +20,34 @@ function Login() {
     event.preventDefault();
 
     try {
-      console.log('Form submitted');
-
-      const response = await fetch(backendUrl + '/user/login', {
+      // Call the backend add user endpoint
+      const response = await fetch(backendUrl + '/user/add', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
-        credentials: 'include',
+        body: JSON.stringify(formData), // Sending the user data (username and password)
       });
 
       if (response.ok) {
-        const data = await response.json();
-        const token = data.jwt;
-
-        localStorage.setItem('token', token);
-        localStorage.setItem('username', data.username);
-        localStorage.setItem('id', data.id);
-
-        alert('Login successful');
-        window.location.href = '/';
+        alert('Signup successful! Please login.');
+        window.location.href = '/login'; // Redirect to login after successful signup
       } else {
-        setError("Username or Password are incorrect");
+        setError('Signup failed. Please try again.');
       }
     } catch (error) {
       console.error(error);
       setError('An error occurred. Please try again later.');
-      alert('An error occurred. Please try again later.');
     }
   };
 
-  useEffect(() => {
-    const checkUserSession = async () => {
-      const isValid = await checkSession();
-      if (isValid) {
-        window.location.href = '/';
-      }
-    };
-    checkUserSession();
-  }, []);
-
   return (
-    <div style={styles.loginContainer}>
-      <div style={styles.loginForm}>
-        <h1 style={styles.heading}>Login</h1>
+    <div style={styles.signupContainer}>
+      <div style={styles.signupForm}>
+        <h1 style={styles.heading}>Sign Up</h1>
         <form onSubmit={handleSubmit}>
           <div style={styles.inputGroup}>
-            <label htmlFor="username" style={styles.label}>Username or Email</label>
+            <label htmlFor="username" style={styles.label}>Username</label>
             <input
               type="text"
               id="username"
@@ -93,28 +70,23 @@ function Login() {
               style={styles.input}
             />
           </div>
-          <button type="submit" style={styles.loginButton}>Login</button>
+          <button type="submit" style={styles.signupButton}>Sign Up</button>
         </form>
         {error && <p style={styles.errorMessage}>{error}</p>}
-
-        {/* Add signup link */}
-        <p style={styles.signupText}>
-          Don't have an account? <Link to="/signup" style={styles.signupLink}>Sign up</Link>
-        </p>
       </div>
     </div>
   );
 }
 
 const styles = {
-  loginContainer: {
+  signupContainer: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
     backgroundColor: '#e0e7ff',
   },
-  loginForm: {
+  signupForm: {
     backgroundColor: '#ffffff',
     padding: '25px',
     borderRadius: '8px',
@@ -144,7 +116,7 @@ const styles = {
     borderRadius: '6px',
     boxSizing: 'border-box',
   },
-  loginButton: {
+  signupButton: {
     width: '100%',
     padding: '12px',
     backgroundColor: '#4f46e5',
@@ -161,15 +133,7 @@ const styles = {
     marginTop: '10px',
     textAlign: 'center',
   },
-  signupText: {
-    textAlign: 'center',
-    marginTop: '15px',
-    color: '#6b7280',
-  },
-  signupLink: {
-    color: '#4f46e5',
-    textDecoration: 'none',
-  },
 };
 
-export default Login;
+export default Signup;
+    

@@ -5,9 +5,14 @@ import com.chatapp.model.Message;
 import com.chatapp.model.User;
 import com.chatapp.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +25,7 @@ public class MessageController {
 
     @Autowired
     private UserRepo userRepo;
+
     @PostMapping("/{userId}/{chatId}/add")
     public ResponseEntity<Message> addMessage(@PathVariable String userId, @PathVariable String chatId, @RequestBody Message message) {
         Optional<User> optionalUser = userRepo.findById(userId);
@@ -39,17 +45,20 @@ public class MessageController {
                     message.setTimestamp(LocalDateTime.now());
                     chat.getMessages().add(message);
 
-                    // Add a system response message
+                    // Call Ollama API to get the response
+                    String ollamaResponse = getOllamaResponse(message.getContent());
+
+                    // Add the response message from Ollama
                     Message response = new Message();
                     response.setId(UUID.randomUUID().toString()); // Set unique ID for the response
                     response.setTimestamp(LocalDateTime.now());
                     response.setSender("Sys");
-                    response.setContent("hh jawab");
+                    response.setContent(ollamaResponse);  // Use the response from Ollama
                     chat.getMessages().add(response);
 
                     userRepo.save(user); // Save the updated user with the new messages
 
-                    // Return the original message as the response
+                    // Return the response message from Ollama as the response
                     return ResponseEntity.ok(response);
                 } else {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Chat not found
@@ -60,6 +69,61 @@ public class MessageController {
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // User not found
+    }
+
+    // Helper method to call Ollama running locally
+    private String getOllamaResponse(String userMessage) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "http://localhost:11434/api/generate";  // Local endpoint for Ollama
+
+        // Create headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Prepare the request body
+        String requestBody = "{ \"prompt\": \"" + userMessage + "\" , \"model\":\"gemma2\"}";
+
+        // Create HTTP entity with headers and body
+        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            // Get the raw body
+            String rawResponse = response.getBody();
+
+            // Split the response by newlines to get individual JSON objects
+            String[] jsonResponses = rawResponse.split("\n");
+
+            StringBuilder combinedResponse = new StringBuilder();
+
+            // Loop through each JSON response string
+            for (String jsonString : jsonResponses) {
+                if (jsonString.trim().isEmpty()) {
+                    continue;  // Skip empty lines
+                }
+
+                try {
+                    // Parse each JSON object
+                    JSONObject jsonResponse = new JSONObject(jsonString);
+
+                    // Append the "response" field to the combined response
+                    combinedResponse.append(jsonResponse.getString("response"));
+
+                    // Check if "done" is true, and if so, stop processing
+                    if (jsonResponse.getBoolean("done")) {
+                        break;
+                    }
+                } catch (JSONException e) {
+                    // Handle any parsing errors (you can log them if needed)
+                    System.err.println("Error parsing JSON: " + e.getMessage());
+                }
+            }
+
+            // Return the combined response
+            return combinedResponse.toString().trim();
+        } else {
+            return "Sorry, I couldn't process your request.";
+        }
     }
 
 

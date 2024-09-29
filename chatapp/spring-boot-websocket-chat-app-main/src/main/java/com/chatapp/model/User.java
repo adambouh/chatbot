@@ -24,8 +24,7 @@ public class User implements UserDetails {
 
     private String username; // Use lowercase for consistency
     private String password; // Use lowercase for consistency
-    private ArrayList<Chat> chats;
-
+    private ArrayList<Chat> chats = new ArrayList<>();
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // Return authorities/roles if you have them. Here, we return an empty collection.

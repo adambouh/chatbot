@@ -24,7 +24,7 @@ const styles = {
     justifyContent: 'flex-start',
   },
   bubble: {
-    maxWidth: '70%', // Smaller width for a more compact bubble
+    maxWidth: '30%', // Smaller width for a more compact bubble
     padding: '8px 12px', // Reduced padding for smaller bubbles
     borderRadius: '15px',
     fontSize: '14px', // Smaller font size
@@ -32,6 +32,8 @@ const styles = {
     backgroundColor: '#EAE4EF',
     color: '#333',
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    wordWrap: 'break-word', // Ensures text breaks to fit within the bubble
+    overflowWrap: 'break-word', // Handles long words like URLs 
   },
 };
 

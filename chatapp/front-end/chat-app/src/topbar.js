@@ -9,7 +9,8 @@ function TopBar() {
       if (isValid) {
 
       }else{
-       // window.location.href = '/login'; // Redirect if session is valid
+        window.location.href = '/login'; // Redirect if session is valid
+        localStorage.clear();
       }
     };
     checkUserSession(); // Run session check on component mount
